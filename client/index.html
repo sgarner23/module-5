@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Back End Assessment</title>
+    <style>
+      #reflection {
+        margin-top: 50px;
+        color: black;
+        position: absolute;
+        display: none;
+      }
+
+      .select-options {
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body class="container">
+    <button id="complimentButton">Get a compliment</button>
+
+    <br />
+    <br />
+    <br />
+
+    <button id="fortune-button">Click to see your fortune!</button>
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+      document.getElementById("complimentButton").onclick = function () {
+        axios
+          .get("http://localhost:4000/api/compliment/")
+          .then(function (response) {
+            const data = response.data;
+            alert(data);
+          });
+      };
+    </script>
+
+    <script>
+      bodyElement = document.querySelector("body");
+      document.getElementById("fortune-button").onclick = function () {
+        axios.get("http://localhost:4000/api/fortune").then(function (res) {
+          console.log(res.data);
+          const data = res.data + "  🥡 ";
+          const newPEle = document.createElement("p");
+          newPEle.textContent = data;
+          newPEle.style.color = "white";
+          newPEle.style.textAlign = "center";
+          bodyElement.style.backgroundImage =
+            "url('https://images.unsplash.com/photo-1514435737152-8e8d0deb41ee?ixid=MnwxMjA3fDB8MHxzZWFyY2h8MTR8fGZvcnR1bmUlMjB0ZWxsZXJ8ZW58MHx8MHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=700&q=60')";
+          bodyElement.appendChild(newPEle);
+
+          setTimeout(function () {
+            document.getElementById("reflection").style.display = "block";
+          }, 2000);
+
+          function sendFeelingsAboutFortune(e) {
+            const sel = e.target;
+            const value = sel.value;
+            const desc = sel.selectedOptions[0].text;
+            // console.log(desc)
+
+            axios
+              .post("http://localhost:4000/api/fortune/feeling/", { desc })
+              .then(function (res) {
+                console.log(res.data);
+                const responseToUser = document.createElement("p");
+                responseToUser.textContent = "Your feedback has been submitted";
+                responseToUser.style.color = "white";
+                responseToUser.style.marginTop = "50px";
+                responseToUser.style.fontSize = "20px";
+                console.log(responseToUser);
+                bodyElement.appendChild(responseToUser);
+              });
+          }
+
+          const feelingBtn = document.getElementById("reflection");
+          feelingBtn.addEventListener("change", sendFeelingsAboutFortune);
+        });
+      };
+
+      setTimeout(function () {
+        const seeAllFortunes = document.createElement("button");
+        seeAllFortunes.textContent = "See full list of fortunes";
+        seeAllFortunes.style.marginTop = "30px";
+        seeAllFortunes.style.position = "absolute";
+        bodyElement.appendChild(seeAllFortunes);
+
+        function seeAllFortunesFunc(e) {
+          console.log("In function");
+          axios
+            .get("http://localhost:4000/api/allfortunes")
+            .then(function (res) {
+              console.log(res.data);
+
+              for (let i = 0; i < res.data.length; i++) {
+                const fortunes = document.createElement("p");
+                fortunes.textContent = res.data[i];
+                fortunes.color = "#774A0A";
+                console.log(fortunes);
+                bodyElement.appendChild(fortunes);
+              }
+            });
+        }
+
+        seeAllFortunes.addEventListener("click", seeAllFortunesFunc);
+      }, 0);
+    </script>
+
+    <div id="feeling-container"></div>
+
+    <div class="select-options">
+      <select name="reflection" id="reflection">
+        <option value="1">This makes me happy</option>
+        <option value="2">This makes me sad</option>
+        <option value="3">Don't Care</option>
+      </select>
+    </div>
+  </body>
+</html>
